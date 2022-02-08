@@ -1,6 +1,6 @@
 # Ekran GUI (ekran-ui)
 
-Ekran is a simple server monitoring app
+Ekran is a simple realtime server monitoring app.
 
 ## Install the dependencies
 

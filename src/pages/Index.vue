@@ -1,17 +1,23 @@
 <template>
-	<q-page class="flex flex-center q-px-md">
-		<template v-if="Object.values(serverList).length > 0">
-			<server-status
-				v-for="(s,x) in serverList"
-				:key="'server_' + x"
-				:server="s"
-			/>
-		</template>
-		<template v-else>
-			<q-banner class="bg-warning full-width">
-				There is no server data yet.
-			</q-banner>
-		</template>
+	<q-page class="q-px-md">
+		<div class="row">
+			<template v-if="Object.values(serverList).length > 0">
+				<div
+					class="col-md-6 q-px-sm q-pt-sm"
+					v-for="(s,x) in serverList"
+					:key="'server_' + x"
+				>
+					<server-status :server="s" />
+				</div>
+			</template>
+			<template v-else>
+				<div class="col-12 q-pt-sm">
+					<q-banner class="bg-warning full-width">
+						There is no server data yet.
+					</q-banner>
+				</div>
+			</template>
+		</div>
 	</q-page>
 </template>
 
@@ -47,7 +53,9 @@ export default defineComponent({
 					// var t = JSON.stringify(data);
 					// console.log(data);
 					// console.log({ [data.server_name]: data });
-					Object.assign(serverList, { [data.server_name]: data });
+					Object.assign(serverList, {
+						[data.server_name]: { ...data, updated: new Date() }
+					});
 					// serverList[data.server_name] = data;
 				});
 			}

@@ -11,7 +11,17 @@
 					@click="toggleLeftDrawer"
 				/>
 				<q-toolbar-title> Ekran </q-toolbar-title>
-				<div>v0.1</div>
+				<div>
+					v0.1
+					<q-btn
+						@click="quitApp"
+						size="sm"
+						color="info"
+						icon="logout"
+						title="Quit"
+					>
+					</q-btn>
+				</div>
 			</q-toolbar>
 		</q-header>
 
@@ -64,12 +74,18 @@ export default defineComponent({
 
 	setup() {
 		const leftDrawerOpen = ref(false);
+		const quitApp = () => {
+			if (process.env.MODE === 'electron') {
+				window.EkranWindowAPI.close();
+			}
+		};
 		return {
 			essentialLinks: linksList,
 			leftDrawerOpen,
 			toggleLeftDrawer() {
 				leftDrawerOpen.value = !leftDrawerOpen.value;
-			}
+			},
+			quitApp
 		};
 	}
 });

@@ -1,12 +1,21 @@
 <template>
-	<q-card class="full-width">
+	<q-card>
 		<q-card-section>
-			<div class="text h6">Server name: {{ server.server_name }}</div>
+			<div class="text h6">Server name: {{ server.server_name }}
+				<q-btn
+					class="float-right"
+					:color="(timepast > 30) ? 'red' : (timepast > 10) ? 'warning' : 'green'"
+					icon="power_settings_new"
+					size="sm"
+					round
+				></q-btn>
+			</div>
 			<div>Uptime: {{ server.data.cpu.uptime }}</div>
+			<div>{{ server.tarih }}</div>
 		</q-card-section>
 		<q-separator />
 		<q-card-section horizontal>
-			<q-card-section class="col-3">
+			<q-card-section class="col-4">
 				<div class="text-h6">Load avarage</div>
 				<q-list
 					dense
@@ -25,44 +34,49 @@
 				</q-list>
 			</q-card-section>
 			<q-separator vertical />
-			<q-card-section class="col-3">
+			<q-card-section class="col-4">
 				<div class="text-h6">Disk usage</div>
+
 				<template
 					v-for="(p,x) in disks"
 					:key="'disk_' + x"
 				>
-					<q-circular-progress
-						:max="100"
-						:value="p.percent"
-						show-value
-						size="50px"
-						:color="p.percent > 95 ? 'red' : (p.percent > 80 ? 'orange' : 'green')"
-						class="q-ma-md"
+					<q-linear-progress
+						rounded
+						size="25px"
+						:value="p.percent / 100"
+						:color="p.percent > 90 ? 'red' : (p.percent > 80 ? 'warning' : 'green')"
+						class="q-mt-sm"
 					>
-						<span class="text-center">
-							{{ p.path }} <br>
-							{{ p.percent + ' %' }}
-						</span>
-					</q-circular-progress>
+						<div class="absolute-full flex flex-center">
+							<q-badge
+								color="white"
+								text-color="accent"
+								:label="'Disk ' + p.path + ' : ' + p.percent + '%'"
+							/>
+						</div>
+					</q-linear-progress>
+
 				</template>
-			</q-card-section>
-			<q-separator vertical />
-			<q-card-section class="col-3">
 				<div class="text-h6">Memory</div>
-				<q-circular-progress
-					:max="100"
-					:value="memory.percent"
-					show-value
-					size="50px"
-					class="q-ma-md"
+				<q-linear-progress
+					rounded
+					size="25px"
+					:value="memory.percent / 100"
+					:color="memory.percent > 90 ? 'red' : (memory.percent > 80 ? 'warning' : 'green')"
+					class="q-mt-sm"
 				>
-					<span class="text-center">
-						{{ memory.percent }} %
-					</span>
-				</q-circular-progress>
+					<div class="absolute-full flex flex-center">
+						<q-badge
+							color="white"
+							text-color="accent"
+							:label="memory.percent + '%'"
+						/>
+					</div>
+				</q-linear-progress>
 			</q-card-section>
 			<q-separator vertical />
-			<q-card-section class="col-3">
+			<q-card-section class="col-4">
 				<div class="text-h6">Services <small class="text-caption">Process count</small></div>
 				<q-list>
 					<q-list
@@ -78,7 +92,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 
 export default defineComponent({
 	name: 'ServerStatus',
@@ -86,6 +100,7 @@ export default defineComponent({
 		server: { type: Object, default: () => {} }
 	},
 	setup(props, ctx) {
+		const timepast = ref(0);
 		const disks = computed(() => {
 			return Object.keys(props.server.data.disk).map((key) => {
 				var d = props.server.data.disk[key];
@@ -93,7 +108,7 @@ export default defineComponent({
 					path: key,
 					free: d.free,
 					total: d.total,
-					percent: (((d.total - d.free) / d.total) * 100).toFixed(2)
+					percent: parseFloat((((d.total - d.free) / d.total) * 100).toFixed(2))
 				};
 			});
 		});
@@ -103,12 +118,16 @@ export default defineComponent({
 				free: m.free,
 				total: m.total,
 				used: m.used,
-				percent: (((m.total - m.free) / m.total) * 100).toFixed(2)
+				percent: parseFloat((((m.total - m.free) / m.total) * 100).toFixed(2))
 			};
 		});
+		var t = setInterval(() => {
+			timepast.value = (new Date() - props.server.updated) / 1000;
+		}, 10000);
 		return {
 			disks,
-			memory
+			memory,
+			timepast
 		};
 	}
 });
